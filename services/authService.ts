@@ -4,8 +4,8 @@ import { UserProfile, Company } from '../types';
 // --- MOCK DATA FOR DEMO ---
 
 export let MOCK_COMPANIES: Company[] = [
-  { id: 'comp_master', name: 'Master', logo_url: 'https://ui-avatars.com/api/?name=Master&background=0D8ABC&color=fff', color_theme: 'blue', active: true },
-  { id: 'comp_amx', name: 'AMX', logo_url: 'https://ui-avatars.com/api/?name=AMX&background=D72638&color=fff', color_theme: 'red', active: true }
+  { id: '6cbdeca4-42ad-4412-ba1a-51a9bfd33ab4', name: 'Master', logo_url: 'https://ui-avatars.com/api/?name=Master&background=0D8ABC&color=fff', color_theme: 'blue', active: true },
+  { id: 'c01ddcc2-7755-4d34-af0a-e0ab6e66c8dc', name: 'AMX', logo_url: 'https://ui-avatars.com/api/?name=AMX&background=D72638&color=fff', color_theme: 'red', active: true }
 ];
 
 // Extending UserProfile internally for Mock Auth to handle passwords
@@ -15,14 +15,14 @@ interface MockUser extends UserProfile {
 
 export let MOCK_USERS: MockUser[] = [
   // Master Users
-  { id: 'user_adelar', email: 'adelar@master.com', full_name: 'Adelar', role: 'admin', company_id: 'comp_master', active: true, password: '123456' },
-  { id: 'user_gustavo', email: 'gustavo@master.com', full_name: 'Gustavo', role: 'admin', company_id: 'comp_master', active: true, password: '123456' },
-  { id: 'user_marcia', email: 'marcia@master.com', full_name: 'Márcia', role: 'user', company_id: 'comp_master', active: true, password: '123456' },
+  { id: 'user_adelar', email: 'adelar@master.com', full_name: 'Adelar', role: 'admin', company_id: '6cbdeca4-42ad-4412-ba1a-51a9bfd33ab4', active: true, password: '123456' },
+  { id: 'user_gustavo', email: 'gustavo@master.com', full_name: 'Gustavo', role: 'admin', company_id: '6cbdeca4-42ad-4412-ba1a-51a9bfd33ab4', active: true, password: '123456' },
+  { id: 'user_marcia', email: 'marcia@master.com', full_name: 'Márcia', role: 'user', company_id: '6cbdeca4-42ad-4412-ba1a-51a9bfd33ab4', active: true, password: '123456' },
 
   // AMX Users
-  { id: 'user_junior', email: 'junior@amx.com', full_name: 'Junior', role: 'admin', company_id: 'comp_amx', active: true, password: '123456' },
-  { id: 'user_kayllane', email: 'kayllane@amx.com', full_name: 'Kayllane', role: 'user', company_id: 'comp_amx', active: true, password: '123456' },
-  { id: 'user_miguel', email: 'miguel@amx.com', full_name: 'Miguel', role: 'user', company_id: 'comp_amx', active: true, password: '123456' }
+  { id: 'user_junior', email: 'junior@amx.com', full_name: 'Junior', role: 'admin', company_id: 'c01ddcc2-7755-4d34-af0a-e0ab6e66c8dc', active: true, password: '123456' },
+  { id: 'user_kayllane', email: 'kayllane@amx.com', full_name: 'Kayllane', role: 'user', company_id: 'c01ddcc2-7755-4d34-af0a-e0ab6e66c8dc', active: true, password: '123456' },
+  { id: 'user_miguel', email: 'miguel@amx.com', full_name: 'Miguel', role: 'user', company_id: 'c01ddcc2-7755-4d34-af0a-e0ab6e66c8dc', active: true, password: '123456' }
 ];
 
 // --- SERVICE ---
