@@ -6,9 +6,10 @@ import { LensForm } from './components/LensForm';
 import { AdminUsers } from './components/AdminUsers';
 import { AdminCompanies } from './components/AdminCompanies';
 import { AdminPurchases } from './components/AdminPurchases';
-import { signOut, getLensRecords, updateUser, getCompanyById } from './services/authService';
-import { UserProfile, LensRecord } from './services/authService';
-import { Logo } from './components/Logo';
+import { signOut, updateUser, getCompanyById } from './services/authService';
+import { getLensRecords } from './services/lensService';
+import { UserProfile, LensRecord } from './types';
+import { Logo } from './components/ui/Logo';
 
 const App: React.FC = () => {
   const [data, setData] = useState<LensRecord[]>([]);

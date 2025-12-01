@@ -1,7 +1,8 @@
 import React, { useState, useRef } from 'react';
 import { Save, RotateCcw, Loader2 } from 'lucide-react';
-import { addLensRecord, UserProfile } from '../services/authService';
-import { DiopterInput } from './DiopterInput';
+import { addLensRecord } from '../services/lensService';
+import { UserProfile } from '../types';
+import { DiopterInput } from './ui/DiopterInput';
 
 const INDICE_OPTIONS = ['1.49', '1.53 - Trivex', '1.56', '1.59 - Poly', '1.60', '1.61', '1.67', '1.74'];
 const STANDARD_TIPO_OPTIONS = ['Incolor', 'Fotossensível', 'Solar'];
