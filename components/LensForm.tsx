@@ -6,7 +6,7 @@ import { DiopterInput } from './ui/DiopterInput';
 
 const INDICE_OPTIONS = ['1.49', '1.53 - Trivex', '1.56', '1.59 - Poly', '1.60', '1.61', '1.67', '1.74'];
 const STANDARD_TIPO_OPTIONS = ['Incolor', 'Photo'];
-const STANDARD_TRATAMENTO_OPTIONS = ['Incolor', 'Anti-Reflexo', 'BlueCut (azul)'];
+const STANDARD_TRATAMENTO_OPTIONS = ['Incolor', 'Anti-Reflexo', 'BlueCut (azul)', 'Filtro Azul (verde)'];
 
 // Opções exclusivas para 1.49
 const RESTRICTED_OPTIONS = ['Incolor'];

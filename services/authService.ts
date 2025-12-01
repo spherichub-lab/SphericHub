@@ -87,74 +87,235 @@ export const signOut = async () => {
 // --- ADMIN USERS FUNCTIONS ---
 
 export const getUsers = async (): Promise<UserProfile[]> => {
-  await new Promise(resolve => setTimeout(resolve, 500));
-  return [...MOCK_USERS];
+  if (isSupabaseConfigured && supabase) {
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('*')
+      .order('full_name');
+
+    if (error) {
+      console.error('Error fetching users:', error);
+      return [];
+    }
+
+    return data || [];
+  } else {
+    await new Promise(resolve => setTimeout(resolve, 500));
+    return [...MOCK_USERS];
+  }
 };
 
 export const createUser = async (newUser: Omit<UserProfile, 'id' | 'active'>) => {
-  await new Promise(resolve => setTimeout(resolve, 500));
-  const created: MockUser = {
-    ...newUser,
-    id: `user_${Math.random().toString(36).substr(2, 9)}`,
-    active: true,
-    password: '123456' // Default password for new users
-  };
-  MOCK_USERS.push(created);
-  return created;
+  if (isSupabaseConfigured && supabase) {
+    // Create user in Supabase Auth with default password
+    const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+      email: newUser.email,
+      password: '123456', // Default password
+      email_confirm: true, // Auto-confirm email
+    });
+
+    if (authError) {
+      console.error('Error creating auth user:', authError);
+      throw new Error(authError.message);
+    }
+
+    if (!authData.user) {
+      throw new Error('Failed to create auth user');
+    }
+
+    // Create profile in profiles table
+    const { data: profileData, error: profileError } = await supabase
+      .from('profiles')
+      .insert([{
+        id: authData.user.id,
+        email: newUser.email,
+        full_name: newUser.full_name,
+        role: newUser.role,
+        company_id: newUser.company_id,
+        active: true,
+      }])
+      .select()
+      .single();
+
+    if (profileError) {
+      console.error('Error creating profile:', profileError);
+      // Try to delete the auth user if profile creation failed
+      await supabase.auth.admin.deleteUser(authData.user.id);
+      throw new Error(profileError.message);
+    }
+
+    return profileData;
+  } else {
+    // Fallback to mock for local development
+    await new Promise(resolve => setTimeout(resolve, 500));
+    const created: MockUser = {
+      ...newUser,
+      id: `user_${Math.random().toString(36).substr(2, 9)}`,
+      active: true,
+      password: '123456'
+    };
+    MOCK_USERS.push(created);
+    return created;
+  }
 };
 
 export const updateUser = async (id: string, updates: Partial<UserProfile> & { password?: string }) => {
-  await new Promise(resolve => setTimeout(resolve, 500));
-  const index = MOCK_USERS.findIndex(u => u.id === id);
-  if (index > -1) {
-    MOCK_USERS[index] = { ...MOCK_USERS[index], ...updates };
+  if (isSupabaseConfigured && supabase) {
+    const { data, error } = await supabase
+      .from('profiles')
+      .update(updates)
+      .eq('id', id)
+      .select()
+      .single();
 
-    // Handle password update explicitly for mock
-    if (updates.password && updates.password.trim() !== '') {
-      MOCK_USERS[index].password = updates.password;
+    if (error) {
+      console.error('Error updating user:', error);
+      throw new Error(error.message);
     }
 
-    return MOCK_USERS[index];
+    // Update password if provided
+    if (updates.password && updates.password.trim() !== '') {
+      const { error: passwordError } = await supabase.auth.admin.updateUserById(id, {
+        password: updates.password
+      });
+
+      if (passwordError) {
+        console.error('Error updating password:', passwordError);
+      }
+    }
+
+    return data;
+  } else {
+    await new Promise(resolve => setTimeout(resolve, 500));
+    const index = MOCK_USERS.findIndex(u => u.id === id);
+    if (index > -1) {
+      MOCK_USERS[index] = { ...MOCK_USERS[index], ...updates };
+
+      // Handle password update explicitly for mock
+      if (updates.password && updates.password.trim() !== '') {
+        MOCK_USERS[index].password = updates.password;
+      }
+
+      return MOCK_USERS[index];
+    }
+    throw new Error("User not found");
   }
-  throw new Error("User not found");
 };
 
 export const deleteUser = async (id: string) => {
-  await new Promise(resolve => setTimeout(resolve, 500));
-  const index = MOCK_USERS.findIndex(u => u.id === id);
-  if (index > -1) MOCK_USERS.splice(index, 1);
+  if (isSupabaseConfigured && supabase) {
+    // Delete from profiles (auth user will be handled by cascade or manually)
+    const { error: profileError } = await supabase
+      .from('profiles')
+      .delete()
+      .eq('id', id);
+
+    if (profileError) {
+      console.error('Error deleting profile:', profileError);
+      throw new Error(profileError.message);
+    }
+
+    // Delete from auth
+    const { error: authError } = await supabase.auth.admin.deleteUser(id);
+
+    if (authError) {
+      console.error('Error deleting auth user:', authError);
+      // Don't throw here as profile is already deleted
+    }
+  } else {
+    await new Promise(resolve => setTimeout(resolve, 500));
+    const index = MOCK_USERS.findIndex(u => u.id === id);
+    if (index > -1) MOCK_USERS.splice(index, 1);
+  }
 };
 
 // --- ADMIN COMPANIES FUNCTIONS ---
 
 export const getCompanies = async (): Promise<Company[]> => {
-  await new Promise(resolve => setTimeout(resolve, 300));
-  return [...MOCK_COMPANIES];
+  if (isSupabaseConfigured && supabase) {
+    const { data, error } = await supabase
+      .from('companies')
+      .select('*')
+      .order('name');
+
+    if (error) {
+      console.error('Error fetching companies:', error);
+      return [];
+    }
+
+    return data || [];
+  } else {
+    await new Promise(resolve => setTimeout(resolve, 300));
+    return [...MOCK_COMPANIES];
+  }
 };
 
 export const createCompany = async (newCompany: Omit<Company, 'id' | 'active'>) => {
-  await new Promise(resolve => setTimeout(resolve, 500));
-  const created: Company = {
-    ...newCompany,
-    id: `comp_${Math.random().toString(36).substr(2, 9)}`,
-    active: true
-  };
-  MOCK_COMPANIES.push(created);
-  return created;
+  if (isSupabaseConfigured && supabase) {
+    const { data, error } = await supabase
+      .from('companies')
+      .insert([{ ...newCompany, active: true }])
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error creating company:', error);
+      throw new Error(error.message);
+    }
+
+    return data;
+  } else {
+    await new Promise(resolve => setTimeout(resolve, 500));
+    const created: Company = {
+      ...newCompany,
+      id: `comp_${Math.random().toString(36).substr(2, 9)}`,
+      active: true
+    };
+    MOCK_COMPANIES.push(created);
+    return created;
+  }
 };
 
 export const updateCompany = async (id: string, updates: Partial<Company>) => {
-  await new Promise(resolve => setTimeout(resolve, 500));
-  const index = MOCK_COMPANIES.findIndex(c => c.id === id);
-  if (index > -1) {
-    MOCK_COMPANIES[index] = { ...MOCK_COMPANIES[index], ...updates };
-    return MOCK_COMPANIES[index];
+  if (isSupabaseConfigured && supabase) {
+    const { data, error } = await supabase
+      .from('companies')
+      .update(updates)
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error updating company:', error);
+      throw new Error(error.message);
+    }
+
+    return data;
+  } else {
+    await new Promise(resolve => setTimeout(resolve, 500));
+    const index = MOCK_COMPANIES.findIndex(c => c.id === id);
+    if (index > -1) {
+      MOCK_COMPANIES[index] = { ...MOCK_COMPANIES[index], ...updates };
+      return MOCK_COMPANIES[index];
+    }
+    throw new Error("Company not found");
   }
-  throw new Error("Company not found");
 };
 
 export const deleteCompany = async (id: string) => {
-  await new Promise(resolve => setTimeout(resolve, 500));
-  const index = MOCK_COMPANIES.findIndex(c => c.id === id);
-  if (index > -1) MOCK_COMPANIES.splice(index, 1);
+  if (isSupabaseConfigured && supabase) {
+    const { error } = await supabase
+      .from('companies')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      console.error('Error deleting company:', error);
+      throw new Error(error.message);
+    }
+  } else {
+    await new Promise(resolve => setTimeout(resolve, 500));
+    const index = MOCK_COMPANIES.findIndex(c => c.id === id);
+    if (index > -1) MOCK_COMPANIES.splice(index, 1);
+  }
 };
