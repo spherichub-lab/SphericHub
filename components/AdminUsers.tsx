@@ -112,286 +112,246 @@ export const AdminUsers: React.FC = () => {
 
         // If in create mode, auto-generate email based on current name and new company
         if (modalMode === 'create') {
-            updatedData.email = generateEmail(formData.full_name, newCompanyId);
-        }
+        };
 
-        setFormData(updatedData);
-    };
-
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!formData.full_name || !formData.email) return;
-
-        try {
-            // Append .com if missing (transparent suffix)
-            const emailToSubmit = formData.email.includes('.') ? formData.email : `${formData.email}.com`;
-
-            if (modalMode === 'create') {
-                await createUser({
-                    full_name: formData.full_name,
-                    email: emailToSubmit,
-                    role: formData.role,
-                    company_id: formData.company_id
-                });
-            } else if (modalMode === 'edit' && userToEdit) {
-                await updateUser(userToEdit.id, {
-                    full_name: formData.full_name,
-                    email: emailToSubmit,
-                    role: formData.role,
-                    company_id: formData.company_id,
-                    active: formData.active
-                });
+        const handleDelete = async () => {
+            if (userToDelete) {
+                await deleteUser(userToDelete.id);
+                setShowDeleteModal(false);
+                setUserToDelete(null);
+                loadUsers();
             }
-            setShowModal(false);
-            loadUsers();
-        } catch (error) {
-            console.error("Error saving user", error);
-        }
-    };
+        };
 
-    const confirmDelete = (user: UserProfile) => {
-        setUserToDelete(user);
-        setShowDeleteModal(true);
-    };
-
-    const handleDelete = async () => {
-        if (userToDelete) {
-            await deleteUser(userToDelete.id);
-            setShowDeleteModal(false);
-            setUserToDelete(null);
-            loadUsers();
-        }
-    };
-
-    return (
-        <div className="space-y-6">
-            <div className="flex justify-between items-center bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-                <div>
-                    <h2 className="text-xl font-bold text-gray-800">Gerenciamento de Usuários</h2>
-                    <p className="text-sm text-gray-500">Controle de acesso e permissões</p>
+        return (
+            <div className="space-y-6">
+                <div className="flex justify-between items-center bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                    <div>
+                        <h2 className="text-xl font-bold text-gray-800">Gerenciamento de Usuários</h2>
+                        <p className="text-sm text-gray-500">Controle de acesso e permissões</p>
+                    </div>
+                    <button
+                        onClick={openCreateModal}
+                        className="flex items-center gap-2 bg-slate-900 text-white px-4 py-2 rounded-lg hover:bg-slate-800 transition-colors"
+                    >
+                        <Plus size={18} /> Novo Usuário
+                    </button>
                 </div>
-                <button
-                    onClick={openCreateModal}
-                    className="flex items-center gap-2 bg-slate-900 text-white px-4 py-2 rounded-lg hover:bg-slate-800 transition-colors"
-                >
-                    <Plus size={18} /> Novo Usuário
-                </button>
-            </div>
 
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                {loading ? (
-                    <div className="p-8 text-center text-gray-500">Carregando usuários...</div>
-                ) : (
-                    <table className="w-full text-sm text-left">
-                        <thead className="bg-gray-50 text-gray-500 uppercase text-xs">
-                            <tr>
-                                <th className="px-6 py-3">Usuário</th>
-                                <th className="px-6 py-3">Login</th>
-                                <th className="px-6 py-3">Função</th>
-                                <th className="px-6 py-3">Empresa</th>
-                                <th className="px-6 py-3 text-center">Ativo</th>
-                                <th className="px-6 py-3 text-right">Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-100">
-                            {users.map(user => {
-                                const company = MOCK_COMPANIES.find(c => c.id === user.company_id);
-                                return (
-                                    <tr key={user.id} className="hover:bg-gray-50">
-                                        <td className="px-6 py-4 font-medium text-gray-900 flex items-center gap-3">
-                                            <div className="bg-gray-200 p-2 rounded-full">
-                                                <User size={16} className="text-gray-600" />
-                                            </div>
-                                            {user.full_name}
-                                        </td>
-                                        <td className="px-6 py-4 text-gray-600">
-                                            {/* Strip .com for display to match user preference */}
-                                            {user.email.replace('.com', '')}
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <span className={`px-2 py-1 rounded-full text-xs font-semibold ${user.role === 'admin' ? 'bg-purple-100 text-purple-700' : 'bg-slate-100 text-slate-700'
-                                                }`}>
-                                                {user.role === 'admin' ? 'Administrador' : 'Usuário'}
-                                            </span>
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <div className="flex items-center gap-2">
-                                                {company?.logo_url ? (
-                                                    <img src={company.logo_url} alt="" className="w-5 h-5 rounded-full object-cover" />
-                                                ) : <Building size={16} />}
-                                                <span className="font-medium text-gray-700">
-                                                    {company?.name || 'Desconhecida'}
+                <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                    {loading ? (
+                        <div className="p-8 text-center text-gray-500">Carregando usuários...</div>
+                    ) : (
+                        <table className="w-full text-sm text-left">
+                            <thead className="bg-gray-50 text-gray-500 uppercase text-xs">
+                                <tr>
+                                    <th className="px-6 py-3">Usuário</th>
+                                    <th className="px-6 py-3">Login</th>
+                                    <th className="px-6 py-3">Função</th>
+                                    <th className="px-6 py-3">Empresa</th>
+                                    <th className="px-6 py-3 text-center">Ativo</th>
+                                    <th className="px-6 py-3 text-right">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-100">
+                                {users.map(user => {
+                                    const company = MOCK_COMPANIES.find(c => c.id === user.company_id);
+                                    return (
+                                        <tr key={user.id} className="hover:bg-gray-50">
+                                            <td className="px-6 py-4 font-medium text-gray-900 flex items-center gap-3">
+                                                <div className="bg-gray-200 p-2 rounded-full">
+                                                    <User size={16} className="text-gray-600" />
+                                                </div>
+                                                {user.full_name}
+                                            </td>
+                                            <td className="px-6 py-4 text-gray-600">
+                                                {/* Strip .com for display to match user preference */}
+                                                {user.email.replace('.com', '')}
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <span className={`px-2 py-1 rounded-full text-xs font-semibold ${user.role === 'admin' ? 'bg-purple-100 text-purple-700' : 'bg-slate-100 text-slate-700'
+                                                    }`}>
+                                                    {user.role === 'admin' ? 'Administrador' : 'Usuário'}
                                                 </span>
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-4 text-center">
-                                            <span className={`inline-block w-2.5 h-2.5 rounded-full ${user.active ? 'bg-green-500' : 'bg-red-500'}`} title={user.active ? "Ativo" : "Inativo"}></span>
-                                        </td>
-                                        <td className="px-6 py-4 text-right">
-                                            <div className="flex items-center justify-end gap-2">
-                                                <button
-                                                    onClick={() => openEditModal(user)}
-                                                    className="text-slate-500 hover:text-slate-700 p-2 rounded hover:bg-slate-50"
-                                                    title="Editar Usuário"
-                                                >
-                                                    <Pencil size={18} />
-                                                </button>
-                                                <button
-                                                    onClick={() => confirmDelete(user)}
-                                                    className="text-red-500 hover:text-red-700 p-2 rounded hover:bg-red-50"
-                                                    title="Remover Usuário"
-                                                >
-                                                    <Trash2 size={18} />
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                );
-                            })}
-                        </tbody>
-                    </table>
-                )}
-            </div>
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <div className="flex items-center gap-2">
+                                                    {company?.logo_url ? (
+                                                        <img src={company.logo_url} alt="" className="w-5 h-5 rounded-full object-cover" />
+                                                    ) : <Building size={16} />}
+                                                    <span className="font-medium text-gray-700">
+                                                        {company?.name || 'Desconhecida'}
+                                                    </span>
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4 text-center">
+                                                <span className={`inline-block w-2.5 h-2.5 rounded-full ${user.active ? 'bg-green-500' : 'bg-red-500'}`} title={user.active ? "Ativo" : "Inativo"}></span>
+                                            </td>
+                                            <td className="px-6 py-4 text-right">
+                                                <div className="flex items-center justify-end gap-2">
+                                                    <button
+                                                        onClick={() => openEditModal(user)}
+                                                        className="text-slate-500 hover:text-slate-700 p-2 rounded hover:bg-slate-50"
+                                                        title="Editar Usuário"
+                                                    >
+                                                        <Pencil size={18} />
+                                                    </button>
+                                                    <button
+                                                        onClick={() => confirmDelete(user)}
+                                                        className="text-red-500 hover:text-red-700 p-2 rounded hover:bg-red-50"
+                                                        title="Remover Usuário"
+                                                    >
+                                                        <Trash2 size={18} />
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
+                            </tbody>
+                        </table>
+                    )}
+                </div>
 
-            {/* Create/Edit Modal */}
-            {showModal && (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6 animate-in fade-in zoom-in duration-200">
-                        <div className="flex justify-between items-center mb-4">
-                            <h3 className="text-lg font-bold">{modalMode === 'create' ? 'Adicionar Usuário' : 'Editar Usuário'}</h3>
-                            <button onClick={() => setShowModal(false)} className="text-gray-500 hover:text-gray-700"><X size={20} /></button>
-                        </div>
-
-                        <form onSubmit={handleSubmit} className="space-y-4">
-
-                            {/* Name Input - Triggers Email Generation */}
-                            <div>
-                                <label className="block text-sm font-medium mb-1 text-gray-700">Nome Completo</label>
-                                <input
-                                    type="text"
-                                    className="w-full border border-gray-300 bg-white text-gray-900 rounded-lg px-3 py-2 focus:ring-2 focus:ring-slate-500 outline-none"
-                                    required
-                                    value={formData.full_name}
-                                    onChange={handleNameChange}
-                                    placeholder="Digite o nome..."
-                                />
+                {/* Create/Edit Modal */}
+                {showModal && (
+                    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                        <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6 animate-in fade-in zoom-in duration-200">
+                            <div className="flex justify-between items-center mb-4">
+                                <h3 className="text-lg font-bold">{modalMode === 'create' ? 'Adicionar Usuário' : 'Editar Usuário'}</h3>
+                                <button onClick={() => setShowModal(false)} className="text-gray-500 hover:text-gray-700"><X size={20} /></button>
                             </div>
 
-                            {/* Company Select - Triggers Email Generation */}
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="col-span-2">
-                                    <label className="block text-sm font-medium mb-1 text-gray-700">Empresa</label>
-                                    <select
-                                        className="w-full border border-gray-300 bg-white text-gray-900 rounded-lg px-3 py-2 focus:ring-2 focus:ring-slate-500 outline-none"
-                                        value={formData.company_id}
-                                        onChange={handleCompanyChange}
-                                    >
-                                        {MOCK_COMPANIES.map(c => (
-                                            <option key={c.id} value={c.id}>{c.name}</option>
-                                        ))}
-                                    </select>
-                                </div>
-                            </div>
+                            <form onSubmit={handleSubmit} className="space-y-4">
 
-                            {/* Read-Only Login Field */}
-                            <div>
-                                <label className="block text-sm font-medium mb-1 text-gray-700">Login (Gerado Autom.)</label>
-                                <div className="relative">
+                                {/* Name Input - Triggers Email Generation */}
+                                <div>
+                                    <label className="block text-sm font-medium mb-1 text-gray-700">Nome Completo</label>
                                     <input
                                         type="text"
-                                        className="w-full border border-gray-300 bg-gray-100 text-gray-500 rounded-lg px-3 py-2 outline-none cursor-not-allowed"
+                                        className="w-full border border-gray-300 bg-white text-gray-900 rounded-lg px-3 py-2 focus:ring-2 focus:ring-slate-500 outline-none"
                                         required
-                                        value={formData.email}
-                                        readOnly
-                                        tabIndex={-1} // Skip tab
+                                        value={formData.full_name}
+                                        onChange={handleNameChange}
+                                        placeholder="Digite o nome..."
                                     />
-                                    <div className="absolute right-3 top-2.5 text-xs text-gray-400 font-medium">
-                                        Não editável
+                                </div>
+
+                                {/* Company Select - Triggers Email Generation */}
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="col-span-2">
+                                        <label className="block text-sm font-medium mb-1 text-gray-700">Empresa</label>
+                                        <select
+                                            className="w-full border border-gray-300 bg-white text-gray-900 rounded-lg px-3 py-2 focus:ring-2 focus:ring-slate-500 outline-none"
+                                            value={formData.company_id}
+                                            onChange={handleCompanyChange}
+                                        >
+                                            {MOCK_COMPANIES.map(c => (
+                                                <option key={c.id} value={c.id}>{c.name}</option>
+                                            ))}
+                                        </select>
                                     </div>
                                 </div>
-                                {modalMode === 'create' && (
-                                    <p className="text-xs text-slate-600 mt-1">
-                                        O login é criado combinando nome e empresa.
-                                    </p>
-                                )}
-                            </div>
 
-                            {/* Password Field Mock */}
-                            <div>
-                                <label className="block text-sm font-medium mb-1 text-gray-700">Senha {modalMode === 'edit' && '(Deixe em branco para manter)'}</label>
-                                <input
-                                    type="password"
-                                    className="w-full border border-gray-300 bg-white text-gray-900 rounded-lg px-3 py-2 focus:ring-2 focus:ring-slate-500 outline-none"
-                                    value={formData.password}
-                                    onChange={e => setFormData({ ...formData, password: e.target.value })}
-                                    placeholder={modalMode === 'create' ? "Senha inicial" : "Nova senha"}
-                                />
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="col-span-2">
-                                    <label className="block text-sm font-medium mb-1 text-gray-700">Função</label>
-                                    <select
-                                        className="w-full border border-gray-300 bg-white text-gray-900 rounded-lg px-3 py-2 focus:ring-2 focus:ring-slate-500 outline-none"
-                                        value={formData.role}
-                                        onChange={e => setFormData({ ...formData, role: e.target.value as UserRole })}
-                                    >
-                                        <option value="user">Usuário</option>
-                                        <option value="admin">Administrador</option>
-                                    </select>
+                                {/* Read-Only Login Field */}
+                                <div>
+                                    <label className="block text-sm font-medium mb-1 text-gray-700">Login (Gerado Autom.)</label>
+                                    <div className="relative">
+                                        <input
+                                            type="text"
+                                            className="w-full border border-gray-300 bg-gray-100 text-gray-500 rounded-lg px-3 py-2 outline-none cursor-not-allowed"
+                                            required
+                                            value={formData.email}
+                                            readOnly
+                                            tabIndex={-1} // Skip tab
+                                        />
+                                        <div className="absolute right-3 top-2.5 text-xs text-gray-400 font-medium">
+                                            Não editável
+                                        </div>
+                                    </div>
+                                    {modalMode === 'create' && (
+                                        <p className="text-xs text-slate-600 mt-1">
+                                            O login é criado combinando nome e empresa.
+                                        </p>
+                                    )}
                                 </div>
-                            </div>
 
-                            <div className="flex items-center gap-2 pt-2">
-                                <input
-                                    type="checkbox"
-                                    id="activeCheck"
-                                    checked={formData.active}
-                                    onChange={e => setFormData({ ...formData, active: e.target.checked })}
-                                    className="w-4 h-4 text-slate-600 rounded focus:ring-slate-500"
-                                />
-                                <label htmlFor="activeCheck" className="text-sm text-gray-700">Usuário Ativo</label>
-                            </div>
+                                {/* Password Field Mock */}
+                                <div>
+                                    <label className="block text-sm font-medium mb-1 text-gray-700">Senha {modalMode === 'edit' && '(Deixe em branco para manter)'}</label>
+                                    <input
+                                        type="password"
+                                        className="w-full border border-gray-300 bg-white text-gray-900 rounded-lg px-3 py-2 focus:ring-2 focus:ring-slate-500 outline-none"
+                                        value={formData.password}
+                                        onChange={e => setFormData({ ...formData, password: e.target.value })}
+                                        placeholder={modalMode === 'create' ? "Senha inicial" : "Nova senha"}
+                                    />
+                                </div>
 
-                            <div className="pt-4 flex gap-3">
-                                <button type="button" onClick={() => setShowModal(false)} className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-gray-700">Cancelar</button>
-                                <button type="submit" className="flex-1 px-4 py-2 bg-slate-900 text-white rounded-lg hover:bg-slate-800 font-medium">Salvar</button>
-                            </div>
-                        </form>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="col-span-2">
+                                        <label className="block text-sm font-medium mb-1 text-gray-700">Função</label>
+                                        <select
+                                            className="w-full border border-gray-300 bg-white text-gray-900 rounded-lg px-3 py-2 focus:ring-2 focus:ring-slate-500 outline-none"
+                                            value={formData.role}
+                                            onChange={e => setFormData({ ...formData, role: e.target.value as UserRole })}
+                                        >
+                                            <option value="user">Usuário</option>
+                                            <option value="admin">Administrador</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div className="flex items-center gap-2 pt-2">
+                                    <input
+                                        type="checkbox"
+                                        id="activeCheck"
+                                        checked={formData.active}
+                                        onChange={e => setFormData({ ...formData, active: e.target.checked })}
+                                        className="w-4 h-4 text-slate-600 rounded focus:ring-slate-500"
+                                    />
+                                    <label htmlFor="activeCheck" className="text-sm text-gray-700">Usuário Ativo</label>
+                                </div>
+
+                                <div className="pt-4 flex gap-3">
+                                    <button type="button" onClick={() => setShowModal(false)} className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-gray-700">Cancelar</button>
+                                    <button type="submit" className="flex-1 px-4 py-2 bg-slate-900 text-white rounded-lg hover:bg-slate-800 font-medium">Salvar</button>
+                                </div>
+                            </form>
+                        </div>
                     </div>
-                </div>
-            )}
+                )}
 
-            {/* Delete Confirmation Modal */}
-            {showDeleteModal && (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-xl shadow-xl max-w-sm w-full p-6 animate-in fade-in zoom-in duration-200">
-                        <div className="flex flex-col items-center text-center">
-                            <div className="bg-red-100 p-3 rounded-full mb-4">
-                                <AlertTriangle className="text-red-600" size={32} />
-                            </div>
-                            <h3 className="text-lg font-bold text-gray-900 mb-2">Confirmar Exclusão</h3>
-                            <p className="text-gray-500 text-sm mb-6">
-                                Tem certeza que deseja remover o usuário <strong>{userToDelete?.full_name}</strong>? Esta ação não pode ser desfeita.
-                            </p>
-                            <div className="flex gap-3 w-full">
-                                <button
-                                    onClick={() => setShowDeleteModal(false)}
-                                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-gray-700"
-                                >
-                                    Cancelar
-                                </button>
-                                <button
-                                    onClick={handleDelete}
-                                    className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium"
-                                >
-                                    Excluir
-                                </button>
+                {/* Delete Confirmation Modal */}
+                {showDeleteModal && (
+                    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                        <div className="bg-white rounded-xl shadow-xl max-w-sm w-full p-6 animate-in fade-in zoom-in duration-200">
+                            <div className="flex flex-col items-center text-center">
+                                <div className="bg-red-100 p-3 rounded-full mb-4">
+                                    <AlertTriangle className="text-red-600" size={32} />
+                                </div>
+                                <h3 className="text-lg font-bold text-gray-900 mb-2">Confirmar Exclusão</h3>
+                                <p className="text-gray-500 text-sm mb-6">
+                                    Tem certeza que deseja remover o usuário <strong>{userToDelete?.full_name}</strong>? Esta ação não pode ser desfeita.
+                                </p>
+                                <div className="flex gap-3 w-full">
+                                    <button
+                                        onClick={() => setShowDeleteModal(false)}
+                                        className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-gray-700"
+                                    >
+                                        Cancelar
+                                    </button>
+                                    <button
+                                        onClick={handleDelete}
+                                        className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium"
+                                    >
+                                        Excluir
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            )}
-        </div>
-    );
-};
+                )}
+            </div>
+        );
+    };
