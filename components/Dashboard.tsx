@@ -1,6 +1,6 @@
 import React, { useMemo, useState, useRef } from 'react';
 import { LensRecord, UserProfile } from '../types';
-import { 
+import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
   PieChart, Pie, Cell
 } from 'recharts';
@@ -17,14 +17,14 @@ interface DashboardProps {
 
 const COLORS = ['#0f172a', '#334155', '#475569', '#64748b', '#94a3b8', '#cbd5e1'];
 const INDICE_OPTIONS = [
-  '1.49 - CR', 
-  '1.53 - Trivex', 
-  '1.56 - CR', 
-  '1.59 - Poly', 
-  '1.60 - Hi-index', 
-  '1.61 - Hi-index', 
-  '1.67 - Hi-index', 
-  '1.74 - Hi-index'
+  '1.49',
+  '1.53 - Trivex',
+  '1.56',
+  '1.59 - Poly',
+  '1.60',
+  '1.61',
+  '1.67',
+  '1.74'
 ];
 // Include 'Incolor' here so users can filter 1.49 records effectively
 const TRATAMENTO_OPTIONS = ['AR', 'Filtro Azul (verde)', 'BlueCut (azul)', 'Incolor'];
@@ -76,7 +76,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ data, currentUser }) => {
     return data.filter(item => {
       // Parse ISO string safely using native Date
       const itemDate = new Date(item.data_registro);
-      
+
       // Date Range Filter
       if (startDate) {
         const start = parseLocalDay(startDate);
@@ -94,7 +94,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ data, currentUser }) => {
       // Exact Match Filters
       if (filterIndice && item.indice !== filterIndice) return false;
       if (filterTratamento && item.tratamento !== filterTratamento) return false;
-      
+
       // Company Filter (Admin only)
       if (isAdmin && filterCompany && item.company_id !== filterCompany) return false;
 
@@ -168,7 +168,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ data, currentUser }) => {
   // -- Ranking Logic --
   const ranking = useMemo(() => {
     const comboMap = new Map<string, { count: number, indice: string, tratamento: string, esf: number, cil: number, company_id: string }>();
-    
+
     filteredData.forEach(r => {
       const key = `${r.indice}|${r.tratamento}|${r.esf}|${r.cil}`;
       const qty = r.quantidade || 1;
@@ -202,19 +202,19 @@ export const Dashboard: React.FC<DashboardProps> = ({ data, currentUser }) => {
 
   return (
     <div id="dashboard-content" className="space-y-6 pb-10">
-      
+
       {/* Header & Actions */}
       <div className="flex flex-wrap justify-between items-center gap-4 bg-white p-4 rounded-xl shadow-sm border border-gray-200">
         <h2 className="text-lg font-bold text-gray-800">Visão Geral</h2>
         <div className="flex gap-2">
-          <button 
+          <button
             onClick={() => exportToTXT(filteredData, startDate, endDate)}
             className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors cursor-pointer"
             disabled={filteredData.length === 0}
           >
             <FileText size={16} /> TXT
           </button>
-          <button 
+          <button
             onClick={() => exportToPDF('dashboard-content')}
             className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-white bg-slate-900 hover:bg-slate-800 rounded-lg transition-colors cursor-pointer"
             disabled={filteredData.length === 0}
@@ -229,7 +229,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ data, currentUser }) => {
         <div className="flex items-center gap-2 mb-3 text-gray-500 text-sm font-semibold uppercase tracking-wide">
           <Filter size={14} /> Filtros de Análise
           {hasActiveFilters && (
-            <button 
+            <button
               onClick={clearFilters}
               className="ml-auto text-xs text-red-500 hover:text-red-700 flex items-center gap-1 cursor-pointer"
             >
@@ -237,15 +237,15 @@ export const Dashboard: React.FC<DashboardProps> = ({ data, currentUser }) => {
             </button>
           )}
         </div>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
           {/* Date Range - START */}
           <div className="relative group cursor-pointer" onClick={() => triggerDatePicker(startDateRef)}>
             <label className="block text-xs font-medium text-gray-500 mb-1 cursor-pointer">De:</label>
             <div className="relative cursor-pointer">
-              <input 
+              <input
                 ref={startDateRef}
-                type="date" 
+                type="date"
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
                 // We use triggerDatePicker on click to ensure picker opens
@@ -259,14 +259,14 @@ export const Dashboard: React.FC<DashboardProps> = ({ data, currentUser }) => {
               <Calendar className="absolute left-2.5 top-2.5 text-gray-400 pointer-events-none group-hover:text-slate-600 transition-colors" size={14} />
             </div>
           </div>
-          
+
           {/* Date Range - END */}
           <div className="relative group cursor-pointer" onClick={() => triggerDatePicker(endDateRef)}>
-             <label className="block text-xs font-medium text-gray-500 mb-1 cursor-pointer">Até:</label>
-             <div className="relative cursor-pointer">
-              <input 
+            <label className="block text-xs font-medium text-gray-500 mb-1 cursor-pointer">Até:</label>
+            <div className="relative cursor-pointer">
+              <input
                 ref={endDateRef}
-                type="date" 
+                type="date"
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
                 onClick={(e) => {
@@ -283,8 +283,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ data, currentUser }) => {
           {/* Attributes */}
           <div>
             <label className="block text-xs font-medium text-gray-500 mb-1">Índice:</label>
-            <select 
-              value={filterIndice} 
+            <select
+              value={filterIndice}
               onChange={(e) => setFilterIndice(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-slate-500 bg-white text-gray-900 cursor-pointer"
             >
@@ -294,9 +294,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ data, currentUser }) => {
           </div>
 
           <div>
-             <label className="block text-xs font-medium text-gray-500 mb-1">Tratamento:</label>
-             <select 
-              value={filterTratamento} 
+            <label className="block text-xs font-medium text-gray-500 mb-1">Tratamento:</label>
+            <select
+              value={filterTratamento}
               onChange={(e) => setFilterTratamento(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-slate-500 bg-white text-gray-900 cursor-pointer"
             >
@@ -307,27 +307,27 @@ export const Dashboard: React.FC<DashboardProps> = ({ data, currentUser }) => {
 
           {/* Admin Company Filter */}
           {isAdmin && (
-             <div>
-                <label className="block text-xs font-medium text-gray-500 mb-1">Empresa (Admin):</label>
-                <select 
-                  value={filterCompany} 
-                  onChange={(e) => setFilterCompany(e.target.value)}
-                  className="w-full px-3 py-2 border border-indigo-300 bg-indigo-50 rounded-lg text-sm outline-none focus:ring-2 focus:ring-indigo-500 text-indigo-900 cursor-pointer"
-                >
-                  <option value="">Todas as Empresas</option>
-                  {MOCK_COMPANIES.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-                </select>
-             </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-500 mb-1">Empresa (Admin):</label>
+              <select
+                value={filterCompany}
+                onChange={(e) => setFilterCompany(e.target.value)}
+                className="w-full px-3 py-2 border border-indigo-300 bg-indigo-50 rounded-lg text-sm outline-none focus:ring-2 focus:ring-indigo-500 text-indigo-900 cursor-pointer"
+              >
+                <option value="">Todas as Empresas</option>
+                {MOCK_COMPANIES.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+              </select>
+            </div>
           )}
         </div>
       </div>
 
       {!stats ? (
-         <div className="flex flex-col items-center justify-center py-20 text-gray-400 bg-white rounded-xl border border-dashed border-gray-300">
-           <Search size={48} className="mb-4 opacity-50" />
-           <p className="text-lg">Nenhum registro encontrado com estes filtros.</p>
-           <button onClick={clearFilters} className="mt-2 text-slate-600 hover:underline cursor-pointer">Limpar Filtros</button>
-         </div>
+        <div className="flex flex-col items-center justify-center py-20 text-gray-400 bg-white rounded-xl border border-dashed border-gray-300">
+          <Search size={48} className="mb-4 opacity-50" />
+          <p className="text-lg">Nenhum registro encontrado com estes filtros.</p>
+          <button onClick={clearFilters} className="mt-2 text-slate-600 hover:underline cursor-pointer">Limpar Filtros</button>
+        </div>
       ) : (
         <>
           {/* KPI Cards */}
@@ -395,8 +395,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ data, currentUser }) => {
                 </thead>
                 <tbody>
                   {ranking.map((row, idx) => {
-                     const compName = MOCK_COMPANIES.find(c => c.id === row.company_id)?.name || '-';
-                     return (
+                    const compName = MOCK_COMPANIES.find(c => c.id === row.company_id)?.name || '-';
+                    return (
                       <tr key={idx} className="border-b last:border-0 hover:bg-gray-50">
                         <td className="px-4 py-3 font-medium text-gray-900">{idx + 1}</td>
                         {isAdmin && <td className="px-4 py-3 text-xs text-gray-500">{compName}</td>}
@@ -406,7 +406,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ data, currentUser }) => {
                           {formatDioptria(row.esf)}
                         </td>
                         <td className="px-4 py-3 font-mono text-red-600">
-                           {formatDioptria(row.cil)}
+                          {formatDioptria(row.cil)}
                         </td>
                         <td className="px-4 py-3 text-right font-bold text-gray-900">{row.count}</td>
                       </tr>
@@ -420,9 +420,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ data, currentUser }) => {
           {/* Full History List Table */}
           <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
             <div className="flex items-center gap-2 mb-4">
-                <Clock size={20} className="text-slate-600"/>
-                <h3 className="text-md font-bold text-gray-800">Histórico de Registros</h3>
-                <span className="text-xs font-normal text-gray-400 ml-auto">Exibindo {filteredData.length} registro(s)</span>
+              <Clock size={20} className="text-slate-600" />
+              <h3 className="text-md font-bold text-gray-800">Histórico de Registros</h3>
+              <span className="text-xs font-normal text-gray-400 ml-auto">Exibindo {filteredData.length} registro(s)</span>
             </div>
             <div className="overflow-x-auto max-h-[500px] overflow-y-auto">
               <table className="w-full text-sm text-left">
@@ -446,9 +446,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ data, currentUser }) => {
                           {format(new Date(row.data_registro), 'dd/MM/yyyy HH:mm', { locale: ptBR })}
                         </td>
                         {isAdmin && (
-                           <td className="px-4 py-3 text-xs text-gray-500 max-w-[150px] truncate" title={compName}>
-                             {compName}
-                           </td>
+                          <td className="px-4 py-3 text-xs text-gray-500 max-w-[150px] truncate" title={compName}>
+                            {compName}
+                          </td>
                         )}
                         <td className="px-4 py-3 font-medium text-gray-900">{row.indice}</td>
                         <td className="px-4 py-3 text-gray-700">{row.tratamento}</td>
@@ -456,7 +456,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ data, currentUser }) => {
                           {formatDioptria(row.esf)}
                         </td>
                         <td className="px-4 py-3 font-mono text-red-600">
-                           {formatDioptria(row.cil)}
+                          {formatDioptria(row.cil)}
                         </td>
                         <td className="px-4 py-3 text-right font-bold text-gray-900">
                           {row.quantidade || 1}
@@ -470,7 +470,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ data, currentUser }) => {
           </div>
         </>
       )}
-      
+
       {/* API Info for N8N */}
       <div className="bg-gray-50 p-4 rounded-lg border border-dashed border-gray-300 text-xs text-gray-500">
         <span className="font-bold">Integração API:</span> Endpoint virtual para n8n disponível em <code>services/lensService.ts</code> via função <code>getRankingLentesAPI()</code>.
