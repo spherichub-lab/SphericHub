@@ -5,7 +5,7 @@ import { UserProfile } from '../types';
 import { DiopterInput } from './ui/DiopterInput';
 
 const INDICE_OPTIONS = ['1.49', '1.53 - Trivex', '1.56', '1.59 - Poly', '1.60', '1.61', '1.67', '1.74'];
-const STANDARD_TIPO_OPTIONS = ['Incolor', 'Fotossensível', 'Solar'];
+const STANDARD_TIPO_OPTIONS = ['Incolor', 'Photo'];
 const STANDARD_TRATAMENTO_OPTIONS = ['Incolor', 'Anti-Reflexo', 'BlueCut (azul)'];
 
 // Opções exclusivas para 1.49
@@ -152,8 +152,8 @@ export const LensForm: React.FC<LensFormProps> = ({ onRecordAdded, currentUser }
                 onChange={(e) => setTipo(e.target.value)}
                 disabled={is149}
                 className={`w-full appearance-none border text-sm rounded-lg block p-3 pr-8 outline-none transition-all ${is149
-                    ? 'bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed'
-                    : 'bg-slate-50 border-slate-200 text-gray-900 focus:ring-slate-500 focus:border-slate-500 hover:bg-slate-100 cursor-pointer'
+                  ? 'bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed'
+                  : 'bg-slate-50 border-slate-200 text-gray-900 focus:ring-slate-500 focus:border-slate-500 hover:bg-slate-100 cursor-pointer'
                   }`}
               >
                 {currentTipoOptions.map(opt => (
@@ -176,8 +176,8 @@ export const LensForm: React.FC<LensFormProps> = ({ onRecordAdded, currentUser }
                 onChange={(e) => setTratamento(e.target.value)}
                 disabled={is149}
                 className={`w-full appearance-none border text-sm rounded-lg block p-3 pr-8 outline-none transition-all ${is149
-                    ? 'bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed'
-                    : 'bg-slate-50 border-slate-200 text-gray-900 focus:ring-slate-500 focus:border-slate-500 hover:bg-slate-100 cursor-pointer'
+                  ? 'bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed'
+                  : 'bg-slate-50 border-slate-200 text-gray-900 focus:ring-slate-500 focus:border-slate-500 hover:bg-slate-100 cursor-pointer'
                   }`}
               >
                 {currentTratamentoOptions.map(opt => (
