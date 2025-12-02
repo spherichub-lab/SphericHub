@@ -40,7 +40,11 @@ const App: React.FC = () => {
 
       const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
         if (event === 'SIGNED_OUT') {
-          handleLogout();
+          // Only call handleLogout if we still think we are logged in locally
+          // This prevents infinite loops where handleLogout calls signOut which triggers SIGNED_OUT
+          if (localStorage.getItem('visulab_user')) {
+            handleLogout();
+          }
         }
       });
 
@@ -58,10 +62,13 @@ const App: React.FC = () => {
   };
 
   const handleLogout = async () => {
-    await signOut();
-    setCurrentUser(null);
+    // Clear local state immediately to prevent loops with auth listener
     localStorage.removeItem('visulab_user');
+    setCurrentUser(null);
     setData([]);
+
+    // Then sign out from Supabase
+    await signOut();
   };
 
   const loadData = async () => {
