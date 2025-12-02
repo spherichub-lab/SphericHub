@@ -8,6 +8,7 @@ import { AdminCompanies } from './components/AdminCompanies';
 import { AdminPurchases } from './components/AdminPurchases';
 import { signOut, updateUser, getCompanyById } from './services/authService';
 import { getLensRecords } from './services/lensService';
+import { supabase, isSupabaseConfigured } from './lib/supabase';
 import { UserProfile, LensRecord } from './types';
 import { Logo } from './components/ui/Logo';
 
@@ -26,6 +27,26 @@ const App: React.FC = () => {
     const savedUser = localStorage.getItem('visulab_user');
     if (savedUser) {
       setCurrentUser(JSON.parse(savedUser));
+    }
+
+    // Verify Supabase Session in Production
+    if (isSupabaseConfigured && supabase) {
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        if (!session && savedUser) {
+          console.log("Session expired, logging out");
+          handleLogout();
+        }
+      });
+
+      const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+        if (event === 'SIGNED_OUT') {
+          handleLogout();
+        }
+      });
+
+      return () => {
+        subscription.unsubscribe();
+      };
     }
   }, []);
 

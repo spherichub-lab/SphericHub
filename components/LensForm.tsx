@@ -99,7 +99,8 @@ export const LensForm: React.FC<LensFormProps> = ({ onRecordAdded, currentUser }
       onRecordAdded();
     } catch (error) {
       console.error(error);
-      setMessage({ type: 'error', text: 'Erro ao salvar registro. Tente novamente.' });
+      const errorMessage = error instanceof Error ? error.message : 'Erro ao salvar registro. Tente novamente.';
+      setMessage({ type: 'error', text: errorMessage });
     } finally {
       setIsSubmitting(false);
     }
