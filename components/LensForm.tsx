@@ -67,12 +67,18 @@ export const LensForm: React.FC<LensFormProps> = ({ onRecordAdded, currentUser }
     setIsSubmitting(true);
 
     try {
+      // Ensure CIL is always negative (except 0.00)
+      let cilValue = parseFloat(cil);
+      if (cilValue > 0) {
+        cilValue = -cilValue;
+      }
+
       await addLensRecord({
         indice,
         tipo,
         tratamento,
         esf: parseFloat(esf),
-        cil: parseFloat(cil),
+        cil: cilValue,
         quantidade: parseInt(quantidade),
         company_id: currentUser.company_id,
         created_by: currentUser.id
@@ -200,6 +206,7 @@ export const LensForm: React.FC<LensFormProps> = ({ onRecordAdded, currentUser }
             label="Esférico (ESF)"
             value={esf}
             onChange={setEsf}
+            type="ESF"
             placeholder="-0.00"
             ref={esfInputRef}
           />
@@ -208,6 +215,7 @@ export const LensForm: React.FC<LensFormProps> = ({ onRecordAdded, currentUser }
             label="Cilíndrico (CIL)"
             value={cil}
             onChange={setCil}
+            type="CIL"
             placeholder="-0.00"
           />
 

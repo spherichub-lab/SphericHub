@@ -470,12 +470,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ data, currentUser }) => {
           </div>
         </>
       )}
-
-      {/* API Info for N8N */}
-      <div className="bg-gray-50 p-4 rounded-lg border border-dashed border-gray-300 text-xs text-gray-500">
-        <span className="font-bold">Integração API:</span> Endpoint virtual para n8n disponível em <code>services/lensService.ts</code> via função <code>getRankingLentesAPI()</code>.
-        Exemplo de retorno JSON implementado conforme especificação.
-      </div>
     </div>
   );
 };

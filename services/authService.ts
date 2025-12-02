@@ -25,6 +25,53 @@ export let MOCK_USERS: MockUser[] = [
   { id: 'user_miguel', email: 'miguel@amx.com', full_name: 'Miguel', role: 'user', company_id: 'c01ddcc2-7755-4d34-af0a-e0ab6e66c8dc', active: true, password: '123456' }
 ];
 
+// --- HELPER FUNCTIONS ---
+
+const getSupabaseUrl = () => {
+  return import.meta.env.VITE_SUPABASE_URL || '';
+};
+
+const callEdgeFunction = async (functionName: string, payload: any) => {
+  if (!supabase) {
+    throw new Error('Supabase not configured');
+  }
+
+  // Get the current session
+  const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+
+  if (sessionError) {
+    console.error('Session error:', sessionError);
+    throw new Error(`Session error: ${sessionError.message}`);
+  }
+
+  if (!session) {
+    console.error('No active session found');
+    throw new Error('Sessão expirada. Por favor, faça login novamente.');
+  }
+
+  const url = `${getSupabaseUrl()}/functions/v1/${functionName}`;
+
+  console.log(`Calling Edge Function: ${functionName}`, { url, hasToken: !!session.access_token });
+
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${session.access_token}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(payload),
+  });
+
+  const result = await response.json();
+
+  if (!response.ok) {
+    console.error(`Edge function ${functionName} error:`, result);
+    throw new Error(result.error || 'Edge function call failed');
+  }
+
+  return result;
+};
+
 // --- SERVICE ---
 
 export const getCompanyById = (id: string): Company | undefined => {
@@ -107,44 +154,17 @@ export const getUsers = async (): Promise<UserProfile[]> => {
 
 export const createUser = async (newUser: Omit<UserProfile, 'id' | 'active'>) => {
   if (isSupabaseConfigured && supabase) {
-    // Create user in Supabase Auth with default password
-    const { data: authData, error: authError } = await supabase.auth.admin.createUser({
-      email: newUser.email,
-      password: '123456', // Default password
-      email_confirm: true, // Auto-confirm email
-    });
-
-    if (authError) {
-      console.error('Error creating auth user:', authError);
-      throw new Error(authError.message);
-    }
-
-    if (!authData.user) {
-      throw new Error('Failed to create auth user');
-    }
-
-    // Create profile in profiles table
-    const { data: profileData, error: profileError } = await supabase
-      .from('profiles')
-      .insert([{
-        id: authData.user.id,
+    try {
+      const result = await callEdgeFunction('create-user', {
         email: newUser.email,
         full_name: newUser.full_name,
         role: newUser.role,
         company_id: newUser.company_id,
-        active: true,
-      }])
-      .select()
-      .single();
-
-    if (profileError) {
-      console.error('Error creating profile:', profileError);
-      // Try to delete the auth user if profile creation failed
-      await supabase.auth.admin.deleteUser(authData.user.id);
-      throw new Error(profileError.message);
+      });
+      return result.data;
+    } catch (error: any) {
+      throw new Error(error.message || 'Erro ao criar usuário');
     }
-
-    return profileData;
   } else {
     // Fallback to mock for local development
     await new Promise(resolve => setTimeout(resolve, 500));
@@ -161,30 +181,19 @@ export const createUser = async (newUser: Omit<UserProfile, 'id' | 'active'>) =>
 
 export const updateUser = async (id: string, updates: Partial<UserProfile> & { password?: string }) => {
   if (isSupabaseConfigured && supabase) {
-    const { data, error } = await supabase
-      .from('profiles')
-      .update(updates)
-      .eq('id', id)
-      .select()
-      .single();
-
-    if (error) {
-      console.error('Error updating user:', error);
-      throw new Error(error.message);
-    }
-
-    // Update password if provided
-    if (updates.password && updates.password.trim() !== '') {
-      const { error: passwordError } = await supabase.auth.admin.updateUserById(id, {
-        password: updates.password
+    try {
+      const result = await callEdgeFunction('update-user', {
+        user_id: id,
+        full_name: updates.full_name,
+        role: updates.role,
+        company_id: updates.company_id,
+        active: updates.active,
+        password: updates.password,
       });
-
-      if (passwordError) {
-        console.error('Error updating password:', passwordError);
-      }
+      return result.data;
+    } catch (error: any) {
+      throw new Error(error.message || 'Erro ao atualizar usuário');
     }
-
-    return data;
   } else {
     await new Promise(resolve => setTimeout(resolve, 500));
     const index = MOCK_USERS.findIndex(u => u.id === id);
@@ -198,29 +207,18 @@ export const updateUser = async (id: string, updates: Partial<UserProfile> & { p
 
       return MOCK_USERS[index];
     }
-    throw new Error("User not found");
+    throw new Error("Usuário não encontrado");
   }
 };
 
 export const deleteUser = async (id: string) => {
   if (isSupabaseConfigured && supabase) {
-    // Delete from profiles (auth user will be handled by cascade or manually)
-    const { error: profileError } = await supabase
-      .from('profiles')
-      .delete()
-      .eq('id', id);
-
-    if (profileError) {
-      console.error('Error deleting profile:', profileError);
-      throw new Error(profileError.message);
-    }
-
-    // Delete from auth
-    const { error: authError } = await supabase.auth.admin.deleteUser(id);
-
-    if (authError) {
-      console.error('Error deleting auth user:', authError);
-      // Don't throw here as profile is already deleted
+    try {
+      await callEdgeFunction('delete-user', {
+        user_id: id,
+      });
+    } catch (error: any) {
+      throw new Error(error.message || 'Erro ao deletar usuário');
     }
   } else {
     await new Promise(resolve => setTimeout(resolve, 500));

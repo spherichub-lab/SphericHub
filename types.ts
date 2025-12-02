@@ -8,6 +8,7 @@ export interface LensRecord {
   quantidade: number;
   data_registro: string;
   company_id: string;
+  created_by?: string;
 }
 
 export type UserRole = 'admin' | 'user';

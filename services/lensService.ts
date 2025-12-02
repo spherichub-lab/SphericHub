@@ -17,9 +17,12 @@ const saveLocalData = (data: LensRecord[]) => {
 
 export const addLensRecord = async (record: Omit<LensRecord, 'id' | 'data_registro'>): Promise<LensRecord | null> => {
   if (isSupabaseConfigured && supabase) {
+    // Remove created_by if it exists, as it's not in the database schema
+    const { created_by, ...dbRecord } = record;
+
     const { data, error } = await supabase
       .from('lentes_saida')
-      .insert([record])
+      .insert([dbRecord])
       .select()
       .single();
 
@@ -37,7 +40,7 @@ export const addLensRecord = async (record: Omit<LensRecord, 'id' | 'data_regist
     };
     const currentData = getLocalData();
     saveLocalData([newRecord, ...currentData]);
-    
+
     // Simulate network delay
     await new Promise(resolve => setTimeout(resolve, 400));
     return newRecord;
@@ -69,10 +72,10 @@ export const getLensRecords = async (user: UserProfile): Promise<LensRecord[]> =
     // Fallback Mock Logic
     await new Promise(resolve => setTimeout(resolve, 300));
     let records = getLocalData();
-    
+
     // Filter Mock Data
     if (user.role !== 'admin') {
-        records = records.filter(r => r.company_id === user.company_id);
+      records = records.filter(r => r.company_id === user.company_id);
     }
 
     return records.sort((a, b) => new Date(b.data_registro).getTime() - new Date(a.data_registro).getTime());

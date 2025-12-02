@@ -99,15 +99,6 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
               {isLoading ? <Loader2 className="animate-spin h-5 w-5" /> : 'Entrar'}
             </button>
           </form>
-
-          <div className="mt-8 pt-6 border-t border-gray-100">
-            <p className="text-xs text-center text-gray-400 mb-2">Contas Demo (Senha: 123456):</p>
-            <div className="flex flex-wrap gap-2 justify-center text-xs">
-              <button type="button" onClick={() => setEmail('adelar@master')} className="px-2 py-1 bg-slate-100 rounded hover:bg-slate-200 text-slate-700">Adelar (Master)</button>
-              <button type="button" onClick={() => setEmail('junior@amx')} className="px-2 py-1 bg-red-50 rounded hover:bg-red-100 text-red-700">Junior (AMX)</button>
-              <button type="button" onClick={() => setEmail('marcia@master')} className="px-2 py-1 bg-gray-100 rounded hover:bg-gray-200 text-gray-700">Márcia (User)</button>
-            </div>
-          </div>
         </div>
       </div>
     </div>

@@ -42,7 +42,7 @@ export const exportToTXT = (data: LensRecord[], startDate: string, endDate: stri
         const company = MOCK_COMPANIES.find(c => c.id === companyId);
         const companyName = company ? company.name : 'Empresa Desconhecida';
 
-        reportContent += `EMPRESA: ${companyName}\n`;
+        reportContent += `\n********** EMPRESA: ${companyName} **********\n`;
         reportContent += `PERÍODO: ${periodString}\n`;
         reportContent += `-------------------------------------------------\n`;
 
@@ -142,7 +142,10 @@ export const exportToTXT = (data: LensRecord[], startDate: string, endDate: stri
         });
 
         sortedGroups.forEach(group => {
-            reportContent += `\n${group.keyDisplay}\n\n`; // Add extra newline between header and list
+            // Add visual separation with lines and uppercase for titles
+            reportContent += `\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+            reportContent += `  ${group.keyDisplay.toUpperCase()}\n`;
+            reportContent += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
 
             // 5. Aggregate Diopters within group ACROSS ALL DATES
             const diopterMap = new Map<string, number>();
@@ -176,7 +179,7 @@ export const exportToTXT = (data: LensRecord[], startDate: string, endDate: stri
             sortedDiopters.forEach(([diopterKey, qty]) => {
                 const [esf, cil] = diopterKey.split('|');
                 // Add extra spaces between ESF and CIL
-                reportContent += `${esf} ${cil}   (Qtd: ${qty})\n`;
+                reportContent += `  ${esf} ${cil}   (Qtd: ${qty})\n`;
             });
         });
 
